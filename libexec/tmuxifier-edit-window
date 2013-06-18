@@ -37,4 +37,4 @@ if [ ! -f "$layout_file" ]; then
   exit 1
 fi
 
-exec "$EDITOR" "$layout_file"
+exec $EDITOR "$layout_file"
