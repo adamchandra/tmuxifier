@@ -2,17 +2,47 @@
 set -e
 [ -n "$TMUXIFIER_DEBUG" ] && set -x
 
+resolve_link() {
+  $(type -p greadlink readlink | head -1) $1
+}
+
+abs_dirname() {
+  local cwd="$(pwd)"
+  local path="$1"
+
+  while [ -n "$path" ]; do
+    cd "${path%/*}"
+    local name="${path##*/}"
+    path="$(resolve_link "$name" || true)"
+  done
+
+  pwd
+  cd "$cwd"
+}
+
 if [ -z "${TMUXIFIER}" ]; then
-  export TMUXIFIER="${HOME}/.tmuxifier"
+  # Set TMUXIFIER relative to the "tmuxifier" executable.
+  export TMUXIFIER="$(dirname "$(abs_dirname "$0")")"
 else
+  # Strip any trailing slash (/) characters from TMUXIFIER variable.
   export TMUXIFIER="${TMUXIFIER%/}"
 fi
 
 # Load tmuxifier environment variables.
 source "$TMUXIFIER/lib/env.sh"
 
+# Add tmuxifier's internal commands to PATH.
 export PATH="$TMUXIFIER/libexec:$PATH"
 
+# Check Tmux version.
+export TMUXIFIER_MIN_TMUX_VERSION="1.6"
+if [ "$(tmuxifier-tmux-version "$TMUXIFIER_MIN_TMUX_VERSION")" == "<" ]; then
+  echo -e "ERROR: Tmuxifier requires Tmux v${TMUXIFIER_MIN_TMUX_VERSION}" \
+       "or newer. You have v$(tmuxifier-tmux-version)." >&2
+  exit 1
+fi
+
+# Parse given command
 command="$1"
 case "$command" in
   "" | "-h" | "--help" )

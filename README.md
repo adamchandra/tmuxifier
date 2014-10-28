@@ -1,11 +1,11 @@
-# Tmuxifier
+# Tmuxifier [![Build Status](https://api.travis-ci.org/jimeh/tmuxifier.svg)](https://travis-ci.org/jimeh/tmuxifier)
 
-Tmuxify your Tmux. Create, edit, mangage and load complex Tmux session, window
+Tmuxify your Tmux. Create, edit, manage and load complex Tmux session, window
 and pane configurations with ease.
 
 In short, Tmuxifier allows you to easily create, edit, and load "layout"
 files, which are simple shell scripts where you use the `tmux` command and
-helper commands provided by tmuxifier to manage Tmux sessions and windows
+helper commands provided by `tmuxifier` to manage Tmux sessions and windows
 
 ### Window Layouts
 
@@ -42,9 +42,7 @@ select_pane 0
 You can then load that window layout into a new window in the
 current tmux session using:
 
-```bash
-tmuxifier load-window example
-```
+    tmuxifier load-window example
 
 Which will yield a Tmux window looking like this:
 
@@ -54,27 +52,84 @@ Which will yield a Tmux window looking like this:
 
 Clone the repo to your machine:
 
+    git clone https://github.com/jimeh/tmuxifier.git ~/.tmuxifier
+
+Then add `$HOME/.tmuxifier/bin` to your PATH to make the `tmuxifier` executable
+available to you:
+
+__In bash & zsh:__
+
 ```bash
-git clone https://github.com/jimeh/tmuxifier.git ~/.tmuxifier
+export PATH="$HOME/.tmuxifier/bin:$PATH"
 ```
 
-### bash & zsh
+__In tcsh:__
+
+```tcsh
+set path = ( "~/.tmuxifier/bin" $path )
+```
+
+__In fish:__
+
+```bash
+set -gx PATH "~/.tmuxifier/bin" $PATH
+```
+
+### Custom Installation Path
+
+To install Tmuxifier somewhere else than the suggested `~/.tmuxifier`, simply
+clone the repository to your custom location, and ensure the `bin` folder is
+added to your PATH making the `tmuxifier` executable available to you.
+
+## Setup
+
+__In bash & zsh:__
 
 And add the following to your `~/.profile`, `~/.bash_profile`, `~/.zshrc` or
 equivalent:
 
 ```bash
-[[ -s "$HOME/.tmuxifier/init.sh" ]] && source "$HOME/.tmuxifier/init.sh"
+eval "$(tmuxifier init -)"
 ```
 
-### tcsh
+__In tcsh:__
 
 Add the following to your `~/.cshrc`, `~/.tcshrc` or equivalent:
 
 ```tcsh
-if ( -s "$HOME/.tmuxifier/init.sh" ) then
-  source "$HOME/.tmuxifier/init.sh"
-endif
+eval `tmuxifier init -`
+```
+
+__In fish:__
+
+And add the following to your `~/.config/fish/config.fish` or equivalent:
+
+```bash
+eval (tmuxifier init -)
+```
+
+### Custom Tmux Arguments
+
+If you need to pass custom arguments to `tmux` itself, you can do so by
+setting the `TMUXIFIER_TMUX_OPTS` environment variable. For example to set
+custom arguments globally:
+
+```bash
+export TMUXIFIER_TMUX_OPTS="-L my-awesome-socket-name"
+eval "$(tmuxifier init -)"
+```
+
+And/or specify dynamically when calling `tmuxifier`:
+
+```bash
+TMUXIFIER_TMUX_OPTS="-L other-socket" tmuxifier load-session welcome
+```
+
+## Updating
+
+```bash
+cd ~/.tmuxifier # or where you've cloned tmuxifier to
+git pull
 ```
 
 ## Usage
@@ -129,17 +184,6 @@ in it.
 
 ## Configure & Customize
 
-### Custom Installaton Path
-
-To install Tmuxifier to a custom path, clone the repository to your desired
-path and set `$TMUXIFIER` to that path, additionally loading `init.sh` or
-`init.tcsh` from that same path.
-
-```bash
-export TMUXIFIER="$HOME/.dotfiles/tmuxifier"
-[[ -s "$TMUXIFIER/init.sh" ]] && source "$TMUXIFIER/init.sh"
-```
-
 ### Custom Layouts Path
 
 You can customize the layouts directory used by Tmuxifier by setting
@@ -151,8 +195,8 @@ export TMUXIFIER_LAYOUT_PATH="$HOME/.tmux-layouts"
 
 ### Disable Shell-Completion
 
-Tmuxifier comes with shell-completion for bash, zsh and tcsh. If for any
-reason you need to disable it, just set `$TMUXIFIER_NO_COMPLETE`.
+Tmuxifier comes with shell-completion for bash, zsh, tcsh, and fish. If for
+any reason you need to disable it, just set `$TMUXIFIER_NO_COMPLETE`.
 
 ```bash
 export TMUXIFIER_NO_COMPLETE=1
@@ -182,25 +226,16 @@ it does set itself apart in a number of ways:
 [tmuxinator]: https://github.com/aziz/tmuxinator
 [rbenv]: https://github.com/sstephenson/rbenv
 
-## Heed My Warning
-
-Tmuxifier is pretty much an alpha product hacked together over a weekend at
-this point. Documentation is sketchy at best, and things might drastically
-change and/or break.
-
-But if that doesn't put you off, please enjoy Tmuxifier :)
-
 ## Todos
 
 * Improve Readme, specially Usage section.
-* Expand `help` command with details for most commands, rather than just the
-  essential ones.
+* Write up a detailed reference for all available layout helper functions.
 
 ## License
 
 (The MIT license)
 
-Copyright (c) 2013 Jim Myhrberg.
+Copyright (c) 2014 Jim Myhrberg.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
