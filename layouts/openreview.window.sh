@@ -11,5 +11,4 @@ new_window "openreview"
 #split_h 50
 
 # Run commands.
-run_cmd "./sbt"
-
+run_cmd "./sbt -Dopenreview.ehcache.config=prj-openreview-core/conf/openreviewCoreCacheManager.xml"

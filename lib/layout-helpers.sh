@@ -239,8 +239,10 @@ __get_first_window_index() {
 
 __go_to_session() {
   if [ -z "$TMUX" ]; then
+    echo trying: tmux -u attach-session -t "$session:"
     tmux -u attach-session -t "$session:"
   else
+    echo trying: tmux -u switch-client -t "$session:"
     tmux -u switch-client -t "$session:"
   fi
 }
