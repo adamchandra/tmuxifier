@@ -22,6 +22,10 @@ new_window() {
   if [ -n "$2" ]; then local command=("$2"); fi
 
   tmuxifier-tmux new-window -t "$session:" "${winarg[@]}" "${command[@]}"
+
+  # Disable renaming if a window name was given.
+  if [ -n "$1" ]; then tmuxifier-tmux set-option -t "$1" allow-rename off; fi
+
   window="$(__get_current_window_index)"
   __go_to_window_or_session_path
 }
@@ -99,6 +103,14 @@ select_window() {
 #
 select_pane() {
   tmuxifier-tmux select-pane -t "$session:$window.$1"
+}
+
+balance_windows_vertical() {
+  tmuxifier-tmux select-layout even-vertical
+}
+
+balance_windows_horizontal() {
+  tmuxifier-tmux select-layout even-horizontal
 }
 
 # Send/paste keys to the currently active pane/window.
@@ -185,30 +197,38 @@ load_window() {
 #   - $2: (optional) Override default window name.
 #
 load_session() {
-  local file="$1"
-  if [ ! -f "$file" ]; then
-    file="$TMUXIFIER_LAYOUT_PATH/$1.session.sh"
-  fi
-
-  if [ -f "$file" ]; then
-    if [ $# -gt 1 ]; then
-      session="$2"
+  local file
+  if [ "${1#*/}" = "$1" ]; then
+    # There's no slash in the path.
+    if [ -f "$TMUXIFIER_LAYOUT_PATH/$1.session.sh" ] || [ ! -f "$1" ]; then
+      file="$TMUXIFIER_LAYOUT_PATH/$1.session.sh"
     else
-      session="${1/%.session.sh}"
-      session="${session/%.sh}"
-    fi
-
-    set_default_path=true
-    source "$file"
-    session=
-
-    # Reset `$session_root`.
-    if [[ "$session_root" != "$HOME" ]]; then
-      session_root="$HOME"
+      # bash's 'source' requires an slash in the filename to not use $PATH.
+      file="./$1"
     fi
   else
+    file="$1"
+  fi
+
+  if ! [ -f "$file" ]; then
     echo "\"$1\" session layout not found." >&2
     return 1
+  fi
+
+  if [ $# -gt 1 ]; then
+    session="$2"
+  else
+    session="${1/%.session.sh}"
+    session="${session/%.sh}"
+  fi
+
+  set_default_path=true
+  source "$file"
+  session=
+
+  # Reset `$session_root`.
+  if [[ "$session_root" != "$HOME" ]]; then
+    session_root="$HOME"
   fi
 }
 
@@ -259,6 +279,11 @@ initialize_session() {
 
     env TMUX="" tmuxifier-tmux new-session \
       -d -s "$session" "${session_args[@]}"
+  fi
+
+  if $set_default_path && [[ "$session_root" != "$HOME" ]]; then
+    tmuxifier-tmux setenv -t "$session:" \
+      TMUXIFIER_SESSION_ROOT "$session_root"
   fi
 
   # In order to ensure only specified windows are created, we move the
@@ -323,16 +348,27 @@ __get_current_window_index() {
 
 __go_to_session() {
   if [ -z "$TMUX" ]; then
-    tmuxifier-tmux -u attach-session -t "$session:"
+    tmuxifier-tmux $TMUXIFIER_TMUX_ITERM_ATTACH -u \
+      attach-session -t "$session:"
   else
     tmuxifier-tmux -u switch-client -t "$session:"
   fi
 }
 
 __go_to_window_or_session_path() {
-  local window_or_session_root=${window_root-$session_root}
-  if [ -n "$window_or_session_root" ]; then
-    run_cmd "cd \"$window_or_session_root\""
+  local target_path
+
+  if [ -n "$window_root" ]; then
+    target_path="$window_root"
+  elif [ -n "$TMUXIFIER_SESSION_ROOT" ]; then
+    target_path="$TMUXIFIER_SESSION_ROOT"
+  elif [ -n "$session_root" ]; then
+    target_path="$session_root"
+  fi
+
+  # local window_or_session_root=${window_root-$session_root}
+  if [ -n "$target_path" ]; then
+    run_cmd "cd \"$target_path\""
     run_cmd "clear"
   fi
 }
