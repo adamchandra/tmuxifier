@@ -5,5 +5,5 @@ new_window "client"
 
 # Run commands.
 run_cmd 'sleep 3'
-run_cmd 'mongodb/bin/mongo orp'
+run_cmd 'mongodb/bin/mongo --shell orp uuidhelpers.js'
 

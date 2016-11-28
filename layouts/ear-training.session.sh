@@ -1,13 +1,15 @@
 # Set a custom session root path. Default is `$HOME`.
 # Must be called before `initialize_session`.
-session_root ~/projects/the-livingroom/dvcs-mirrors/bitbucket.com/iesl@bitbucket.com/tackbp
+
+session_root "/home/saunders/projects/the-study/muse-eek-ear-training"
 
 # Create session with specified name if it does not already exist. If no
 # argument is given, session name will be based on layout file name.
-if initialize_session "deft-bbn"; then
+if initialize_session "ear-training"; then
 
-  load_window "tackbp"
-  load_window "deft"
+  # Create a new window inline within session layout definition.
+  new_window "muse-eek"
+
 
 fi
 

@@ -1,14 +1,19 @@
 # Set a custom session root path. Default is `$HOME`.
 # Must be called before `initialize_session`.
-session_root ~/projects/the-livingroom/dvcs-mirrors/bitbucket.com/iesl@bitbucket.com/tackbp-vis
+session_root "/home/saunders/projects/the-livingroom/rexa-text-extractors"
 
 # Create session with specified name if it does not already exist. If no
 # argument is given, session name will be based on layout file name.
-if initialize_session "tackbp-vis"; then
+if initialize_session "text-ex"; then
 
-  # load_window "mongodb-server"
-  load_window "mongo"
-  load_window "tackbp-vis"
+  # Create a new window inline within session layout definition.
+  load_window "xml-annotator"
+  load_window "rpp"
+  load_window "paper-header"
+  # load_window "bibie"
+  load_window "factorie"
+
+  select_window 1
 
 fi
 
