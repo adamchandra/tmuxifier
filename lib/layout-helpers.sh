@@ -105,12 +105,42 @@ select_pane() {
   tmuxifier-tmux select-pane -t "$session:$window.$1"
 }
 
+# Balance windows vertically with the "even-vertical" layout.
+#
+# Arguments:
+#   - $1: (optional) Window ID or name to operate on.
+#
 balance_windows_vertical() {
-  tmuxifier-tmux select-layout even-vertical
+  tmuxifier-tmux select-layout -t "$session:${1:-$window}" even-vertical
 }
 
+# Balance windows horizontally with the "even-horizontal" layout.
+#
+# Arguments:
+#   - $1: (optional) Window ID or name to operate on.
+#
 balance_windows_horizontal() {
-  tmuxifier-tmux select-layout even-horizontal
+  tmuxifier-tmux select-layout -t "$session:${1:-$window}" even-horizontal
+}
+
+# Turn on synchronize-panes in a window.
+#
+# Arguments:
+#   - $1: (optional) Window ID or name to operate on.
+#
+synchronize_on() {
+  tmuxifier-tmux set-window-option -t "$session:${1:-$window}" \
+                 synchronize-panes on
+}
+
+# Turn off synchronize-panes in a window.
+#
+# Arguments:
+#   - $1: (optional) Window ID or name to operate on.
+#
+synchronize_off() {
+  tmuxifier-tmux set-window-option -t "$session:${1:-$window}" \
+                 synchronize-panes off
 }
 
 # Send/paste keys to the currently active pane/window.
@@ -253,7 +283,7 @@ initialize_session() {
   tmuxifier-tmux start-server
 
   # Check if the named session already exists.
-  if tmuxifier-tmux has-session -t "$session:" 2>/dev/null; then
+  if tmuxifier-tmux list-sessions | grep -q "^$session:"; then
     return 1
   fi
 
